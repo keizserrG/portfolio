@@ -1,50 +1,87 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <title>Carl Daniel Geraldez — Portfolio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<video autoplay muted loop playsinline id="bg-video">
+  <source src="girl ame 13.mp4" type="video/mp4">
+</video>
+<div class="bg-overlay"></div>
+
+<audio loop id="bg-music">
+  <source src="Tobi Theme Song.mp3" type="audio/mpeg">
+</audio>
+
 <header>
-  <h1>My Portfolio</h1>
+  <a href="#top" class="logo">CDG<span class="dot">.</span></a>
+
   <nav>
-    <a href="#projects">Projects</a>
-    <a href="#contact">Contact</a>
-    <a href="#aboutme">About me</a>
-    
+    <a href="#aboutme" data-nav>About</a>
+    <a href="#projects" data-nav>Projects</a>
+    <a href="#contact" data-nav>Contact</a>
   </nav>
+
+  <div class="volume-control">
+    <button id="mute-btn" aria-label="Mute background music" aria-pressed="false">
+      <svg class="icon icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17.5 8.5a5 5 0 0 1 0 7"/><path d="M20 6a9 9 0 0 1 0 12"/></svg>
+      <svg class="icon icon-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 9l6 6M22 9l-6 6"/></svg>
+    </button>
+    <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5" aria-label="Volume">
+  </div>
 </header>
-<section id="aboutme">
-  <h2>About me</h2>
-  <p style="text-align: justify; text-align: center;">My name is Carl Daniel Geraldez, I'm 20 years old,<br>and
-    im still figuring out about what i want to be in life.
-  </p>
-</section>
 
-<section id="projects">
-  <a href="">Projects</a>
-  <p>No Projects yet.</p>
-</section>
+<main id="top">
 
-<section id="contact">
-  <h2>Contact</h2>
-  <h3>Click to contact:</h3>
-  <a href="https://mail.google.com/mail/?view=cm&fs=1&to=carldaniel.geraldez@gmail.com" target="_blank">
-    carldaniel.geraldez@gmail.com
-  </a>
-</section>
+  <section id="hero" class="hero">
+    <p class="eyebrow">&gt; whoami</p>
+    <h1 class="typed-target" data-text="Carl Daniel Geraldez">Carl Daniel Geraldez</h1>
+    <p class="hero-sub">
+      20 · Cebu, Philippines
+      <span class="status"><span class="status-dot"></span>figuring it out, one build at a time</span>
+    </p>
+  </section>
 
+  <section id="aboutme" class="reveal">
+    <p class="eyebrow">01 — About</p>
+    <h2>About me</h2>
+    <p class="lead">
+      I'm Carl, 20, based in Cebu. I don't have it all figured out yet —
+      but while I decide, I like learning how things are built and building them myself.
+    </p>
+  </section>
 
-<section id="videoBG">
-  <video autoplay muted loop id="bg-video">
-    <source src="girl ame 13.mp4" type="video/mp4">
-  </video>
-</section>
+  <section id="projects" class="reveal">
+    <p class="eyebrow">02 — Projects</p>
+    <h2>Projects</h2>
+    <div class="empty-state">
+      <span class="status-dot status-dot--pending"></span>
+      <p>No projects deployed yet. Check back soon.</p>
+    </div>
+  </section>
 
+  <section id="contact" class="reveal">
+    <p class="eyebrow">03 — Contact</p>
+    <h2>Contact</h2>
+    <div class="contact-links">
+      <a href="mailto:you@example.com" class="contact-link">
+        <span>Email</span><span class="arrow" aria-hidden="true">→</span>
+      </a>
+      <a href="https://github.com/keizserrG" class="contact-link" target="_blank" rel="noopener">
+        <span>GitHub</span><span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </div>
+  </section>
 
-  
+</main>
 
-
-
+<script src="script.js"></script>
 </body>
 </html>
