@@ -313,11 +313,15 @@ h2 {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
   padding: 16px 20px;
   text-decoration: none;
   color: var(--text);
   background: var(--surface);
+  font-family: inherit;
   font-size: 15px;
+  border: none;
+  cursor: pointer;
   transition: background 0.25s ease, padding-left 0.25s ease, color 0.25s ease;
 }
 .contact-link + .contact-link {
