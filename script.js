@@ -35,28 +35,29 @@ volumeSlider.addEventListener('input', () => {
 });
 
 /* ============================
+   Toast helper
+   ============================ */
+const toast = document.getElementById('toast');
+let toastTimer;
+function showToast(message) {
+  toast.textContent = message;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+/* ============================
    Socials: copy Discord tag on click
    ============================ */
 document.querySelectorAll('.copy-link').forEach((btn) => {
-  const label = btn.querySelector('span:first-child');
-  const arrow = btn.querySelector('.arrow-copy');
-  const originalLabel = label.textContent;
-  const originalArrow = arrow.textContent;
-
   btn.addEventListener('click', async () => {
     const value = btn.dataset.copy;
     try {
       await navigator.clipboard.writeText(value);
-      label.textContent = 'Copied!';
-      arrow.textContent = '✓';
+      showToast(`Discord tag "${value}" copied to clipboard`);
     } catch {
-      label.textContent = value;
-      arrow.textContent = '✓';
+      showToast('Could not copy — copy it manually: ' + value);
     }
-    setTimeout(() => {
-      label.textContent = originalLabel;
-      arrow.textContent = originalArrow;
-    }, 1500);
   });
 });
 
