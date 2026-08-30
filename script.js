@@ -35,6 +35,32 @@ volumeSlider.addEventListener('input', () => {
 });
 
 /* ============================
+   Socials: copy Discord tag on click
+   ============================ */
+document.querySelectorAll('.copy-link').forEach((btn) => {
+  const label = btn.querySelector('span:first-child');
+  const arrow = btn.querySelector('.arrow-copy');
+  const originalLabel = label.textContent;
+  const originalArrow = arrow.textContent;
+
+  btn.addEventListener('click', async () => {
+    const value = btn.dataset.copy;
+    try {
+      await navigator.clipboard.writeText(value);
+      label.textContent = 'Copied!';
+      arrow.textContent = '✓';
+    } catch {
+      label.textContent = value;
+      arrow.textContent = '✓';
+    }
+    setTimeout(() => {
+      label.textContent = originalLabel;
+      arrow.textContent = originalArrow;
+    }, 1500);
+  });
+});
+
+/* ============================
    Hero: typing effect
    ============================ */
 const typedEl = document.querySelector('.typed-target');
