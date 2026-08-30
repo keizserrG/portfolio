@@ -1,38 +1,19 @@
 const audio = document.getElementById('bg-music');
-const muteBtn = document.getElementById('mute-btn');
-const volumeSlider = document.getElementById('volume-slider');
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ============================
-   Audio: initial volume
+   Audio: fixed default volume
    ============================ */
-audio.volume = Number(volumeSlider.value);
+audio.volume = 0.5;
 
-/* start playing music on the first click anywhere that isn't the volume control.
-   Keeps listening until playback actually starts — a single {once:true} listener
-   would burn itself out if the first click happened to land on the volume control. */
-function startMusicOnClick(event) {
-  if (event.target.closest('.volume-control')) return;
+/* start playing music on the first click anywhere on the page.
+   Keeps listening until playback actually starts. */
+function startMusicOnClick() {
   audio.play()
     .then(() => document.removeEventListener('click', startMusicOnClick))
     .catch((err) => console.warn('Autoplay blocked, will retry on next click:', err));
 }
 document.addEventListener('click', startMusicOnClick);
-
-/* mute/unmute button */
-muteBtn.addEventListener('click', () => {
-  audio.muted = !audio.muted;
-  muteBtn.setAttribute('aria-pressed', audio.muted ? 'true' : 'false');
-});
-
-/* volume slider */
-volumeSlider.addEventListener('input', () => {
-  audio.volume = Number(volumeSlider.value);
-  if (audio.volume > 0 && audio.muted) {
-    audio.muted = false;
-    muteBtn.setAttribute('aria-pressed', 'false');
-  }
-});
 
 /* ============================
    Toast helper
