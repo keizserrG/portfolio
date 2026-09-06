@@ -2,6 +2,55 @@ const audio = document.getElementById('bg-music');
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ============================
+   Background video: forced autoplay
+   The HTML autoplay attribute alone is unreliable inside
+   Facebook/Instagram in-app browsers and some mobile WebViews —
+   they often ignore it or pause it mid-handoff. This forces
+   play() at every point where it's likely to have been blocked
+   or interrupted, and mutes via JS as a backup to the attribute.
+   ============================ */
+const bgVideo = document.getElementById('bg-video');
+
+if (bgVideo) {
+  bgVideo.muted = true;
+  bgVideo.defaultMuted = true;
+  bgVideo.playsInline = true;
+
+  const tryPlayVideo = () => {
+    const playPromise = bgVideo.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(() => {
+        // Blocked for now — one of the listeners below will retry.
+      });
+    }
+  };
+
+  tryPlayVideo();
+
+  ['loadedmetadata', 'loadeddata', 'canplay', 'canplaythrough'].forEach((evt) => {
+    bgVideo.addEventListener(evt, tryPlayVideo);
+  });
+
+  // In-app browsers (FB/IG) sometimes pause the video during the
+  // redirect/handoff — resume once the page is actually visible.
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && bgVideo.paused) tryPlayVideo();
+  });
+  window.addEventListener('pageshow', () => {
+    if (bgVideo.paused) tryPlayVideo();
+  });
+
+  // Last resort: a few WebViews only unlock playback after a gesture,
+  // even when muted. Catch the very first touch/click/scroll.
+  const gestureEvents = ['touchstart', 'click', 'scroll'];
+  const resumeOnGesture = () => {
+    if (bgVideo.paused) tryPlayVideo();
+    gestureEvents.forEach((evt) => document.removeEventListener(evt, resumeOnGesture));
+  };
+  gestureEvents.forEach((evt) => document.addEventListener(evt, resumeOnGesture, { passive: true }));
+}
+
+/* ============================
    Audio: fixed default volume
    ============================ */
 audio.volume = 0.5;
