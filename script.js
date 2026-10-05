@@ -50,20 +50,6 @@ if (bgVideo) {
 }
 
 /* ============================
-   Audio: fixed default volume, starts on first click
-   ============================ */
-const audio = document.getElementById('bg-music');
-if (audio) {
-  audio.volume = 0.5;
-  const startMusicOnClick = () => {
-    audio.play()
-      .then(() => document.removeEventListener('click', startMusicOnClick))
-      .catch(() => { /* blocked or file missing — retry on next click */ });
-  };
-  document.addEventListener('click', startMusicOnClick);
-}
-
-/* ============================
    Toast helper
    ============================ */
 const toast = document.getElementById('toast');
