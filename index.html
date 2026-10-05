@@ -8,39 +8,44 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.17/dist/lenis.css">
   <link rel="stylesheet" href="style.css">
+  <link rel="preload" as="image" href="images/cebu-night.webp">
   <script>document.documentElement.classList.add('js');</script>
 </head>
 <body>
 
-<div class="progress" aria-hidden="true"><span></span></div>
+<!-- Intro: image panel wipes up, logo is revealed and leaves, then the panel peels away -->
+<div class="preloader" data-preloader aria-hidden="true">
+  <div class="preloader-bg" data-preloader-bg>
+    <img src="images/cebu-night.webp" alt="" data-preloader-bg-image>
+  </div>
+  <div class="preloader-logo" data-preloader-logo>CDG<span class="dot">.</span></div>
+</div>
 
-<header class="site-header">
+<header class="site-header" data-nav-bar>
   <a href="#top" class="logo">CDG<span class="dot">.</span></a>
   <nav aria-label="Sections">
-    <a href="#about" data-nav>About</a>
-    <a href="#socials" data-nav>Socials</a>
-    <a href="#projects" data-nav>Projects</a>
-    <a href="#contact" data-nav>Contact</a>
+    <a href="#about" data-nav class="btn-animate-chars"><span data-button-animate-chars>About</span></a>
+    <a href="#socials" data-nav class="btn-animate-chars"><span data-button-animate-chars>Socials</span></a>
+    <a href="#projects" data-nav class="btn-animate-chars"><span data-button-animate-chars>Projects</span></a>
+    <a href="#contact" data-nav class="btn-animate-chars"><span data-button-animate-chars>Contact</span></a>
   </nav>
 </header>
 
 <main id="top">
 
-  <!-- 01 Hero — transition: characters rise out of a mask -->
-  <section id="hero" class="hero">
-    <div class="hero-media" aria-hidden="true">
+  <!-- Hero -->
+  <section id="hero" class="hero" data-hero>
+    <div class="hero-media" data-hero-bg aria-hidden="true">
       <video autoplay muted loop playsinline id="bg-video">
         <source src="girl ame 13.mp4" type="video/mp4">
       </video>
     </div>
     <div class="hero-inner">
-      <p class="eyebrow hero-fade" style="--d: 0ms">Portfolio — 2026</p>
-      <h1 class="hero-title" aria-label="Carl Daniel Geraldez">
-        <span class="line" data-split>Carl Daniel</span>
-        <span class="line" data-split>Geraldez</span>
-      </h1>
-      <div class="hero-meta hero-fade" style="--d: 900ms">
+      <p class="eyebrow" data-hero-fade>Portfolio — 2026</p>
+      <h1 class="hero-title" data-hero-heading>Carl Daniel<br><span class="muted">Geraldez</span></h1>
+      <div class="hero-meta" data-hero-paragraph>
         <span>20</span>
         <span class="sep" aria-hidden="true"></span>
         <span>Cebu, Philippines</span>
@@ -48,51 +53,54 @@
         <span class="status"><span class="status-dot"></span>Figuring it out, one build at a time</span>
       </div>
     </div>
-    <a href="#about" class="scroll-cue hero-fade" style="--d: 1200ms" aria-label="Scroll to About">
-      <span></span>
-    </a>
+    <div class="hero-line" data-hero-line aria-hidden="true"></div>
+    <a href="#about" class="scroll-cue" data-hero-fade aria-label="Scroll to About"><span></span></a>
   </section>
 
-  <!-- 02 About — transition: words sharpen in from a blur -->
-  <section id="about" class="section reveal" data-reveal="blur-words">
-    <div class="section-label">
-      <span class="num">01</span>
-      <span class="name">About</span>
+  <!-- About -->
+  <section id="about" class="section" data-reveal-content="component">
+    <div class="section-label" data-reveal-content="fade">
+      <span class="num">01</span><span class="name">About</span>
     </div>
     <div class="section-body">
-      <p class="statement" data-words>
+      <h2 class="section-title" data-reveal-content="heading">A bit about me.</h2>
+      <p class="statement" data-reveal-content="paragraph">
         I'm Carl, a 20-year-old from Cebu still working out what I want to build.
         Most of my free time goes into games — Valorant, CS2, Apex Legends, Roblox
         and a long list of others — and into learning how the things I play are made.
       </p>
+      <figure class="media media--wide" data-reveal-content="image" data-parallax="trigger">
+        <img src="images/cebu-night.webp" alt="Cebu City lights at night, seen from Tops Lookout" data-parallax="target" loading="lazy">
+        <figcaption>Cebu City from Tops Lookout</figcaption>
+      </figure>
     </div>
   </section>
 
-  <!-- 03 Socials — transition: rows slide in from the left as their rules draw -->
-  <section id="socials" class="section reveal" data-reveal="slide-rows">
-    <div class="section-label">
-      <span class="num">02</span>
-      <span class="name">Socials</span>
+  <!-- Socials -->
+  <section id="socials" class="section" data-reveal-content="component">
+    <div class="section-label" data-reveal-content="fade">
+      <span class="num">02</span><span class="name">Socials</span>
     </div>
     <div class="section-body">
-      <ul class="rows">
-        <li style="--i: 0">
-          <a href="https://www.instagram.com/xantifico/" class="row" target="_blank" rel="noopener">
-            <span class="row-title">Instagram</span>
+      <h2 class="section-title" data-reveal-content="heading">Find me online.</h2>
+      <ul class="rows" data-reveal-content="paragraph">
+        <li>
+          <a href="https://www.instagram.com/xantifico/" class="row btn-animate-chars" target="_blank" rel="noopener">
+            <span class="row-title" data-button-animate-chars>Instagram</span>
             <span class="row-meta">@xantifico</span>
             <span class="row-icon" aria-hidden="true">↗</span>
           </a>
         </li>
-        <li style="--i: 1">
-          <button type="button" class="row copy-link" data-copy="064v_e">
-            <span class="row-title">Discord</span>
+        <li>
+          <button type="button" class="row copy-link btn-animate-chars" data-copy="064v_e">
+            <span class="row-title" data-button-animate-chars>Discord</span>
             <span class="row-meta">064v_e</span>
             <span class="row-icon" aria-hidden="true">⧉</span>
           </button>
         </li>
-        <li style="--i: 2">
-          <a href="https://www.facebook.com/isusayinsomethingyoucanttellmenothing/" class="row" target="_blank" rel="noopener">
-            <span class="row-title">Facebook</span>
+        <li>
+          <a href="https://www.facebook.com/isusayinsomethingyoucanttellmenothing/" class="row btn-animate-chars" target="_blank" rel="noopener">
+            <span class="row-title" data-button-animate-chars>Facebook</span>
             <span class="row-meta">Profile</span>
             <span class="row-icon" aria-hidden="true">↗</span>
           </a>
@@ -101,16 +109,16 @@
     </div>
   </section>
 
-  <!-- 04 Projects — transition: the panel opens outward from its centre -->
-  <section id="projects" class="section reveal" data-reveal="iris">
-    <div class="section-label">
-      <span class="num">03</span>
-      <span class="name">Projects</span>
+  <!-- Projects -->
+  <section id="projects" class="section" data-reveal-content="component">
+    <div class="section-label" data-reveal-content="fade">
+      <span class="num">03</span><span class="name">Projects</span>
     </div>
     <div class="section-body">
-      <div class="panel">
-        <div class="panel-grid" aria-hidden="true"></div>
-        <div class="panel-content">
+      <h2 class="section-title" data-reveal-content="heading">Work in progress.</h2>
+      <div class="panel" data-reveal-content="image" data-parallax="trigger">
+        <img class="panel-image" src="images/rgb-setup.webp" alt="" data-parallax="target" loading="lazy">
+        <div class="panel-content" data-reveal-content="paragraph">
           <span class="badge"><span class="status-dot status-dot--pending"></span>In progress</span>
           <p class="panel-title">Nothing shipped yet.</p>
           <p class="panel-text">The first projects are being built. Check back soon.</p>
@@ -119,20 +127,26 @@
     </div>
   </section>
 
-  <!-- 05 Contact — transition: content flips up into place in 3D -->
-  <section id="contact" class="section reveal" data-reveal="flip">
-    <div class="section-label">
-      <span class="num">04</span>
-      <span class="name">Contact</span>
+  <!-- Image break -->
+  <div class="band" data-reveal-content="component">
+    <figure class="media media--band" data-reveal-content="image" data-parallax="trigger">
+      <img src="images/keyboard.webp" alt="A black mechanical gaming keyboard" data-parallax="target" loading="lazy">
+    </figure>
+  </div>
+
+  <!-- Contact -->
+  <section id="contact" class="section" data-reveal-content="component">
+    <div class="section-label" data-reveal-content="fade">
+      <span class="num">04</span><span class="name">Contact</span>
     </div>
     <div class="section-body">
-      <h2 class="cta flip-item" style="--i: 0">Let's talk.</h2>
-      <div class="cta-links">
-        <a href="mailto:carldaniel.geraldez@gmail.com" class="pill flip-item" style="--i: 1">
-          Email <span aria-hidden="true">→</span>
+      <h2 class="cta" data-reveal-content="heading">Let's talk.</h2>
+      <div class="cta-links" data-reveal-content="fade">
+        <a href="mailto:carldaniel.geraldez@gmail.com" class="pill btn-animate-chars">
+          <span data-button-animate-chars>Email</span> <span class="pill-icon" aria-hidden="true">→</span>
         </a>
-        <a href="https://github.com/keizserrG" class="pill flip-item" style="--i: 2" target="_blank" rel="noopener">
-          GitHub <span aria-hidden="true">↗</span>
+        <a href="https://github.com/keizserrG" class="pill btn-animate-chars" target="_blank" rel="noopener">
+          <span data-button-animate-chars>GitHub</span> <span class="pill-icon" aria-hidden="true">↗</span>
         </a>
       </div>
     </div>
@@ -142,11 +156,21 @@
 
 <footer class="site-footer">
   <span>© <span id="year">2026</span> Carl Daniel Geraldez</span>
+  <span class="credits">
+    Photos: <a href="https://commons.wikimedia.org/wiki/File:Wikinights_Cebu_-_Tops_Lookout_(019).jpg" target="_blank" rel="noopener">Bjeweld</a>
+    (<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>),
+    SankalpSasnur, AzureSaturn (CC0) via Wikimedia Commons
+  </span>
   <a href="#top" class="to-top">Back to top ↑</a>
 </footer>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.3.17/dist/lenis.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

@@ -1,4 +1,16 @@
+/* ============================================================
+   Motion modelled on abatable.com: GSAP + ScrollTrigger + SplitText,
+   Lenis smooth scrolling and the same custom "osmo" ease, intro
+   sequence, character/scale reveals, image wipes and parallax.
+   Reveals replay every time a section comes back into view.
+   ============================================================ */
+
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const hasGsap = !!(window.gsap && window.ScrollTrigger && window.SplitText && window.CustomEase && window.Lenis);
+const animate = hasGsap && !prefersReducedMotion;
+
+const preloader = document.querySelector('[data-preloader]');
+const header = document.querySelector('[data-nav-bar]');
 
 /* ============================
    Background video: forced autoplay
@@ -50,7 +62,7 @@ if (bgVideo) {
 }
 
 /* ============================
-   Toast helper
+   Toast + copy Discord tag
    ============================ */
 const toast = document.getElementById('toast');
 let toastTimer;
@@ -61,9 +73,6 @@ function showToast(message) {
   toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
 }
 
-/* ============================
-   Socials: copy Discord tag on click
-   ============================ */
 document.querySelectorAll('.copy-link').forEach((btn) => {
   btn.addEventListener('click', async () => {
     const value = btn.dataset.copy;
@@ -77,128 +86,229 @@ document.querySelectorAll('.copy-link').forEach((btn) => {
 });
 
 /* ============================
-   Text splitting for the hero and About transitions
+   Button / link character roll (pure CSS once split)
    ============================ */
-// Hero: every character in its own span, numbered for the stagger.
-document.querySelectorAll('[data-split]').forEach((line) => {
-  const text = line.textContent.trim();
-  line.textContent = '';
-  [...text].forEach((ch, i) => {
-    const span = document.createElement('span');
-    span.className = 'char';
-    span.style.setProperty('--ci', i);
-    span.textContent = ch;
-    line.appendChild(span);
-  });
-});
-
-// About: every word in its own span; spaces stay as text so lines wrap naturally.
-document.querySelectorAll('[data-words]').forEach((el) => {
-  const words = el.textContent.trim().split(/\s+/);
+document.querySelectorAll('[data-button-animate-chars]').forEach((el) => {
+  const text = el.textContent;
+  el.setAttribute('aria-label', text);
   el.textContent = '';
-  words.forEach((word, i) => {
+  [...text].forEach((char, i) => {
     const span = document.createElement('span');
-    span.className = 'w';
-    span.style.setProperty('--wi', i);
-    span.textContent = word;
+    span.setAttribute('aria-hidden', 'true');
+    span.textContent = char === ' ' ? ' ' : char;
+    span.style.transitionDelay = `${i * 0.018}s`;
     el.appendChild(span);
-    if (i < words.length - 1) el.appendChild(document.createTextNode(' '));
   });
 });
-
-/* ============================
-   Replaying transitions
-   Every section (hero included) plays its entrance each time it
-   scrolls into view, and resets once it has fully left the screen.
-   Resetting only at 0% visible means the reverse never plays where
-   the user can see it, and a section half on screen never flickers.
-   ============================ */
-const hero = document.querySelector('.hero');
-const ENTER_AT = 0.25;
-
-function watchReplay(el, className, enterAt) {
-  new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        // Tall sections on small screens never reach the ratio, so half a
-        // screen of the section showing counts as "in view" too.
-        const fillsScreen = entry.intersectionRect.height >= window.innerHeight * 0.5;
-        if (entry.intersectionRatio >= enterAt || fillsScreen) {
-          entry.target.classList.add(className);
-        } else if (!entry.isIntersecting) {
-          entry.target.classList.remove(className);
-        }
-      });
-    },
-    { threshold: [0, enterAt, 0.5, 0.75, 1] }
-  ).observe(el);
-}
-
-// Hero waits for the fonts first so the letter masks line up.
-const startHero = () => requestAnimationFrame(() => watchReplay(hero, 'ready', 0.1));
-if (document.fonts && document.fonts.ready) {
-  Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 800))]).then(startHero);
-} else {
-  startHero();
-}
-
-document.querySelectorAll('.reveal').forEach((el) => watchReplay(el, 'in-view', ENTER_AT));
 
 /* ============================
    Nav: highlight the section in view
    ============================ */
 const navLinks = document.querySelectorAll('nav a[data-nav]');
+const hero = document.querySelector('[data-hero]');
 const navObserver = new IntersectionObserver(
   (entries) => {
     entries.forEach((entry) => {
       if (!entry.isIntersecting) return;
-      navLinks.forEach((l) => {
-        l.classList.toggle('active', l.getAttribute('href') === `#${entry.target.id}`);
-      });
+      const id = entry.target.id;
+      navLinks.forEach((l) => l.classList.toggle('active', id !== 'hero' && l.getAttribute('href') === `#${id}`));
     });
   },
-  { rootMargin: '-45% 0px -50% 0px', threshold: 0 }
-);
-navLinks.forEach((link) => {
-  const section = document.querySelector(link.getAttribute('href'));
-  if (section) navObserver.observe(section);
-});
-// Clear the highlight when back at the top.
-new IntersectionObserver(
-  ([entry]) => { if (entry.isIntersecting) navLinks.forEach((l) => l.classList.remove('active')); },
   { rootMargin: '-45% 0px -50% 0px' }
-).observe(hero);
+);
+[hero, ...Array.from(navLinks, (l) => document.querySelector(l.getAttribute('href')))]
+  .filter(Boolean)
+  .forEach((s) => navObserver.observe(s));
 
-/* ============================
-   Scroll: progress bar, header background, hero video fade
-   ============================ */
-const header = document.querySelector('.site-header');
-const progress = document.querySelector('.progress');
-const heroMedia = document.querySelector('.hero-media');
-let ticking = false;
-
-function onScroll() {
-  const y = window.scrollY;
-  const max = document.documentElement.scrollHeight - window.innerHeight;
-  progress.style.setProperty('--p', max > 0 ? (y / max).toFixed(4) : 0);
+function updateHeader(y) {
   header.classList.toggle('scrolled', y > 24);
-
-  if (!prefersReducedMotion && heroMedia) {
-    const t = Math.min(y / hero.offsetHeight, 1);
-    heroMedia.style.setProperty('--media-o', (1 - t * 0.9).toFixed(3));
-    heroMedia.style.setProperty('--media-s', (1 + t * 0.08).toFixed(3));
-  }
-  ticking = false;
 }
-window.addEventListener('scroll', () => {
-  if (!ticking) {
-    ticking = true;
-    requestAnimationFrame(onScroll);
-  }
-}, { passive: true });
-onScroll();
 
-/* ============================
-   Footer year
-   ============================ */
 document.getElementById('year').textContent = new Date().getFullYear();
+
+/* ============================================================
+   No GSAP (CDN blocked) or reduced motion: static page.
+   ============================================================ */
+if (!animate) {
+  if (preloader) preloader.remove();
+  window.addEventListener('scroll', () => updateHeader(window.scrollY), { passive: true });
+  updateHeader(window.scrollY);
+} else {
+  const ready = document.fonts && document.fonts.ready
+    ? Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 1200))])
+    : Promise.resolve();
+  ready.then(initMotion);
+}
+
+function initMotion() {
+  gsap.registerPlugin(CustomEase, ScrollTrigger, SplitText);
+  CustomEase.create('osmo', '0.625, 0.05, 0, 1');
+  gsap.defaults({ ease: 'osmo', duration: 1 });
+
+  /* ---------- Lenis smooth scroll ---------- */
+  const lenis = new Lenis({ lerp: 0.1, wheelMultiplier: 1 });
+  lenis.on('scroll', ScrollTrigger.update);
+  lenis.on('scroll', ({ scroll }) => updateHeader(scroll));
+  gsap.ticker.add((time) => lenis.raf(time * 1000));
+  gsap.ticker.lagSmoothing(0);
+  updateHeader(window.scrollY);
+
+  // In-page links glide with Lenis instead of jumping.
+  document.querySelectorAll('a[href^="#"]').forEach((a) => {
+    a.addEventListener('click', (e) => {
+      const id = a.getAttribute('href');
+      const target = id === '#top' ? 0 : document.querySelector(id);
+      if (target === null) return;
+      e.preventDefault();
+      lenis.scrollTo(target, { duration: 1.6, easing: (t) => 1 - Math.pow(1 - t, 4) });
+    });
+  });
+
+  /* ---------- Hero ---------- */
+  const heroBG = hero.querySelector('[data-hero-bg]');
+  const heroHeading = hero.querySelector('[data-hero-heading]');
+  const heroParagraph = hero.querySelector('[data-hero-paragraph]');
+  const heroFades = hero.querySelectorAll('[data-hero-fade]');
+  const heroLine = hero.querySelector('[data-hero-line]');
+  const heroSplit = SplitText.create(heroHeading, { type: 'chars, words', charsClass: 'char-mask', wordsClass: 'word-mask' });
+
+  // The hero's own reveal, used by the intro and on every return to the top.
+  // fromTo (not to) so a replay timeline built while the hero is already
+  // visible still knows its hidden starting point.
+  function heroReveal(tl, at) {
+    return tl
+      .fromTo(heroLine, { scaleX: 0 }, { scaleX: 1, duration: 1.75 }, at)
+      .fromTo(heroSplit.chars, { opacity: 0 },
+        { opacity: 1, duration: 0.5, stagger: { each: 0.03, from: 'start' }, ease: 'none' }, '<0.5')
+      .fromTo(heroParagraph, { opacity: 0, scale: 0.9 },
+        { opacity: 1, scale: 1, duration: 0.8, ease: 'power2.out' }, '<0.4')
+      .fromTo(heroFades, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5, ease: 'power2.out' }, '<0.4');
+  }
+
+  /* ---------- Intro (full sequence once per browser session) ---------- */
+  let seenIntro = false;
+  try { seenIntro = sessionStorage.getItem('cdg-intro') === '1'; } catch { /* storage blocked */ }
+
+  const intro = gsap.timeline({
+    onComplete: () => {
+      if (preloader) preloader.remove();
+      lenis.start();
+      try { sessionStorage.setItem('cdg-intro', '1'); } catch { /* storage blocked */ }
+      setupHeroReplay();
+      ScrollTrigger.refresh();
+    },
+  });
+
+  // Sections and parallax are wired up straight away: under the intro curtain
+  // nothing shows, and after a mid-page reload nothing flashes.
+  setupReveals();
+  setupParallax();
+
+  if (!seenIntro && preloader && window.scrollY < 10) {
+    lenis.stop();
+    const bg = preloader.querySelector('[data-preloader-bg]');
+    const bgImage = preloader.querySelector('[data-preloader-bg-image]');
+    const logo = preloader.querySelector('[data-preloader-logo]');
+
+    intro
+      .set([logo, bg], { autoAlpha: 1 }, 0)
+      .from(bgImage, { scale: 1.125, duration: 3, ease: 'none' })
+      .fromTo(bg,
+        { clipPath: 'polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)', scale: 1.1 },
+        { clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)', scale: 1, duration: 1.5 }, '<')
+      .fromTo(logo,
+        { clipPath: 'polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)', scale: 1.1 },
+        { clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)', scale: 1, duration: 1.25, ease: 'expo.out' }, '<0.5')
+      .to(logo, { clipPath: 'polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)', scale: 1.1, duration: 1.5 }, '>')
+      .fromTo(preloader,
+        { clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)' },
+        { clipPath: 'polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)', duration: 1.5 }, '<')
+      .from(heroBG, { scale: 1.25, duration: 2.75, ease: 'expo.out' }, '<')
+      .from(header, { yPercent: -125, duration: 1.5, ease: 'expo.out', clearProps: 'transform' }, '<1');
+    heroReveal(intro, '<');
+  } else {
+    // Repeat visit in this session, or reloaded mid-page: skip the curtain.
+    if (preloader) preloader.remove();
+    intro
+      .from(heroBG, { scale: 1.25, duration: 2.75, ease: 'expo.out' }, 0)
+      .from(header, { yPercent: -125, duration: 1.5, ease: 'expo.out', clearProps: 'transform' }, 0.2);
+    heroReveal(intro, 0.2);
+  }
+
+  /* ---------- Replay helper ----------
+     Plays `tl` when the trigger reaches 80% of the viewport (from either
+     direction) and rewinds it only once the trigger is fully off screen,
+     so the reset itself is never visible. */
+  function replayOnView(trigger, tl, start = 'top 80%', end = 'bottom 20%') {
+    ScrollTrigger.create({
+      trigger, start, end,
+      onEnter: () => tl.play(),
+      onEnterBack: () => tl.play(),
+    });
+    ScrollTrigger.create({
+      trigger, start: 'top bottom', end: 'bottom top',
+      onLeave: () => tl.pause(0),
+      onLeaveBack: () => tl.pause(0),
+    });
+  }
+
+  function setupHeroReplay() {
+    const tl = heroReveal(gsap.timeline({ paused: true }), 0);
+    tl.progress(1); // the intro already showed it
+    ScrollTrigger.create({
+      trigger: hero, start: 'top bottom', end: 'bottom top',
+      onEnterBack: () => tl.restart(),
+      onLeave: () => tl.pause(0),
+    });
+  }
+
+  /* ---------- Section reveals (abatable's data-reveal-content) ---------- */
+  function setupReveals() {
+    document.querySelectorAll('[data-reveal-content="component"]').forEach((component) => {
+      const headings = component.querySelectorAll('[data-reveal-content="heading"]');
+      const paragraphs = component.querySelectorAll('[data-reveal-content="paragraph"]');
+      const fades = component.querySelectorAll('[data-reveal-content="fade"]');
+      const images = component.querySelectorAll('[data-reveal-content="image"]');
+      const tl = gsap.timeline({ paused: true });
+
+      // Images: wipe up from the bottom edge while settling from 110%.
+      images.forEach((img) => {
+        gsap.set(img, { clipPath: 'polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)', scale: 1.1 });
+        tl.to(img, { clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)', scale: 1, duration: 1.5 }, 0);
+      });
+
+      // Headings: characters fade in one after another.
+      headings.forEach((heading) => {
+        const split = SplitText.create(heading, { type: 'chars, words', charsClass: 'char-mask', wordsClass: 'word-mask' });
+        gsap.set(split.chars, { opacity: 0 });
+        tl.to(split.chars, { opacity: 1, duration: 0.5, stagger: { each: 0.03, from: 'start' }, ease: 'none' }, 0);
+      });
+
+      // Paragraphs: fade up from 90% scale.
+      paragraphs.forEach((p) => {
+        gsap.set(p, { opacity: 0, scale: 0.9 });
+        tl.to(p, { opacity: 1, scale: 1, duration: 0.8, ease: 'power2.out' }, 0.4);
+      });
+
+      // Everything else (labels, buttons): plain fade, last.
+      if (fades.length) {
+        gsap.set(fades, { autoAlpha: 0 });
+        tl.to(fades, { autoAlpha: 1, duration: 0.5, ease: 'power2.out' }, 0.8);
+      }
+
+      replayOnView(component, tl);
+    });
+  }
+
+  /* ---------- Parallax (abatable's data-parallax) ---------- */
+  function setupParallax() {
+    document.querySelectorAll('[data-parallax="trigger"]').forEach((trigger) => {
+      const target = trigger.querySelector('[data-parallax="target"]') || trigger;
+      gsap.fromTo(target, { yPercent: -10 }, {
+        yPercent: 10,
+        ease: 'none',
+        scrollTrigger: { trigger, start: 'top bottom', end: 'bottom top', scrub: true },
+      });
+    });
+  }
+}

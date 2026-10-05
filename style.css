@@ -19,15 +19,13 @@
   --header-h: 68px;
   --gutter: clamp(20px, 5vw, 56px);
   --max: 1120px;
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  /* abatable.com's "osmo" curve, used for every hover and CSS move */
+  --ease-osmo: cubic-bezier(0.625, 0.05, 0, 1);
 }
 
 *,
 *::before,
 *::after { box-sizing: border-box; }
-
-html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
@@ -51,23 +49,44 @@ button:focus-visible {
   border-radius: 4px;
 }
 
+img { display: block; max-width: 100%; }
+
 /* ============================================================
-   Scroll progress
+   Preloader
+   Visible only with JS; script.js removes it if GSAP failed to load.
    ============================================================ */
-.progress {
+.preloader { display: none; }
+
+.js .preloader {
   position: fixed;
-  inset: 0 0 auto 0;
-  height: 2px;
-  z-index: 30;
-  pointer-events: none;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
 }
-.progress span {
-  display: block;
+.preloader-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+.preloader-bg img {
+  width: 100%;
   height: 100%;
-  background: var(--accent);
-  transform-origin: left;
-  transform: scaleX(var(--p, 0));
+  object-fit: cover;
+  filter: brightness(0.45) saturate(0.8);
 }
+.preloader-logo {
+  position: relative;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(56px, 12vw, 160px);
+  letter-spacing: -0.04em;
+  line-height: 1;
+  visibility: hidden;
+}
+.dot { color: var(--accent); }
 
 /* ============================================================
    Header
@@ -81,8 +100,8 @@ button:focus-visible {
   align-items: center;
   justify-content: space-between;
   z-index: 20;
-  transition: background 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease;
   border-bottom: 1px solid transparent;
+  transition: background 0.6s var(--ease-osmo), border-color 0.6s var(--ease-osmo);
 }
 .site-header.scrolled {
   background: rgba(11, 11, 12, 0.72);
@@ -98,38 +117,45 @@ button:focus-visible {
   letter-spacing: 0.01em;
   text-decoration: none;
 }
-.logo .dot { color: var(--accent); }
 
 nav {
   display: flex;
   gap: clamp(18px, 3vw, 36px);
 }
 nav a {
-  position: relative;
   font-size: 14px;
   color: var(--text-muted);
   text-decoration: none;
-  padding: 6px 0;
-  transition: color 0.25s ease;
-}
-nav a::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 1px;
-  background: var(--text);
-  transform: scaleX(0);
-  transform-origin: right;
-  transition: transform 0.45s var(--ease-out);
+  transition: color 0.4s var(--ease-osmo);
 }
 nav a:hover,
 nav a.active { color: var(--text); }
-nav a:hover::after,
-nav a.active::after {
-  transform: scaleX(1);
-  transform-origin: left;
+
+/* ============================================================
+   Character roll on hover (abatable's button effect)
+   Each letter carries a copy of itself 1.5em below via text-shadow;
+   on hover the letters slide up one after another.
+   ============================================================ */
+[data-button-animate-chars] {
+  display: inline-block;
+  overflow: hidden;
+  position: relative;
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+  margin-top: -0.2em;
+  margin-bottom: -0.2em;
+  vertical-align: bottom;
+}
+[data-button-animate-chars] span {
+  display: inline-block;
+  position: relative;
+  text-shadow: 0 1.5em currentColor;
+  transform: translateY(0) rotate(0.001deg);
+  transition: transform 0.6s var(--ease-osmo);
+}
+.btn-animate-chars:hover [data-button-animate-chars] span,
+.btn-animate-chars:focus-visible [data-button-animate-chars] span {
+  transform: translateY(-1.5em) rotate(0.001deg);
 }
 
 /* ============================================================
@@ -154,10 +180,19 @@ nav a.active::after {
   font-size: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding-top: 10px;
+  padding-top: 14px;
 }
 .section-label .num { color: var(--accent); }
 .section-label .name { color: var(--text-muted); }
+
+.section-title {
+  margin: 0 0 40px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(36px, 5.4vw, 68px);
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
 
 .eyebrow {
   margin: 0;
@@ -191,7 +226,51 @@ nav a.active::after {
 }
 
 /* ============================================================
-   01 Hero
+   Images: a clipped frame with a taller image inside,
+   so the parallax has room to travel without showing edges.
+   ============================================================ */
+.media {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--bg-raised);
+}
+.media img {
+  position: absolute;
+  left: 0;
+  top: -15%;
+  width: 100%;
+  height: 130%;
+  object-fit: cover;
+}
+.media figcaption {
+  position: absolute;
+  left: 18px;
+  bottom: 16px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: rgba(237, 237, 235, 0.75);
+}
+.media--wide {
+  margin-top: 56px;
+  aspect-ratio: 16 / 9;
+}
+.media--wide img { filter: brightness(0.8); }
+
+.band {
+  max-width: calc(var(--max) + 2 * var(--gutter));
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+.media--band {
+  aspect-ratio: 21 / 8;
+}
+.media--band img { filter: brightness(0.75) contrast(1.05); }
+
+/* ============================================================
+   Hero
    ============================================================ */
 .hero {
   position: relative;
@@ -207,9 +286,6 @@ nav a.active::after {
   position: absolute;
   inset: 0;
   z-index: -1;
-  opacity: var(--media-o, 1);
-  transform: scale(var(--media-s, 1));
-  will-change: opacity, transform;
 }
 .hero-media video {
   width: 100%;
@@ -240,16 +316,7 @@ nav a.active::after {
   line-height: 0.95;
   letter-spacing: -0.045em;
 }
-.hero-title .line {
-  display: block;
-  overflow: hidden;
-  padding-bottom: 0.06em; /* keeps descenders inside the mask */
-}
-.hero-title .line:nth-child(2) { color: var(--text-muted); }
-.hero-title .char {
-  display: inline-block;
-  white-space: pre;
-}
+.hero-title .muted { color: var(--text-muted); }
 
 .hero-meta {
   display: flex;
@@ -258,11 +325,22 @@ nav a.active::after {
   gap: 10px 16px;
   font-size: 15px;
   color: var(--text-muted);
+  transform-origin: left center;
 }
 .hero-meta .sep {
   width: 18px;
   height: 1px;
   background: var(--line-strong);
+}
+
+.hero-line {
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: clamp(36px, 6vh, 64px);
+  height: 1px;
+  background: var(--line-strong);
+  transform-origin: left;
 }
 
 .scroll-cue {
@@ -282,7 +360,7 @@ nav a.active::after {
   margin-top: 7px;
   border-radius: 2px;
   background: var(--text);
-  animation: cue 1.8s var(--ease-in-out) infinite;
+  animation: cue 1.8s var(--ease-osmo) infinite;
 }
 @keyframes cue {
   0%   { transform: translateY(0); opacity: 0; }
@@ -291,42 +369,31 @@ nav a.active::after {
 }
 
 /* ============================================================
-   02 About
+   About
    ============================================================ */
 .statement {
   margin: 0;
-  max-width: 30ch;
+  max-width: 34ch;
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(26px, 3.6vw, 44px);
-  line-height: 1.22;
-  letter-spacing: -0.02em;
+  font-size: clamp(22px, 2.6vw, 32px);
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+  color: var(--text-muted);
+  transform-origin: left top;
 }
-.statement .w { display: inline-block; }
 
 /* ============================================================
-   03 Socials
+   Socials
    ============================================================ */
 .rows {
   list-style: none;
   margin: 0;
   padding: 0;
+  border-top: 1px solid var(--line-strong);
+  transform-origin: left top;
 }
-.rows li {
-  position: relative;
-}
-.rows li::before,
-.rows li:last-child::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: var(--line-strong);
-  transform-origin: left;
-}
-.rows li::before { top: 0; }
-.rows li:last-child::after { bottom: 0; }
+.rows li { border-bottom: 1px solid var(--line-strong); }
 
 .row {
   width: 100%;
@@ -347,7 +414,6 @@ nav a.active::after {
   font-family: var(--font-display);
   font-size: clamp(22px, 2.6vw, 30px);
   letter-spacing: -0.02em;
-  transition: transform 0.5s var(--ease-out);
 }
 .row-meta {
   font-family: var(--font-mono);
@@ -357,10 +423,8 @@ nav a.active::after {
 .row-icon {
   justify-self: end;
   color: var(--text-muted);
-  transition: transform 0.5s var(--ease-out), color 0.3s ease;
+  transition: transform 0.6s var(--ease-osmo), color 0.4s var(--ease-osmo);
 }
-.row:hover .row-title,
-.row:focus-visible .row-title { transform: translateX(12px); }
 .row:hover .row-icon,
 .row:focus-visible .row-icon {
   color: var(--accent);
@@ -368,31 +432,38 @@ nav a.active::after {
 }
 
 /* ============================================================
-   04 Projects
+   Projects
    ============================================================ */
 .panel {
   position: relative;
-  min-height: 320px;
+  min-height: clamp(320px, 38vw, 440px);
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: 14px;
   background: var(--bg-raised);
   overflow: hidden;
   display: flex;
   align-items: flex-end;
 }
-.panel-grid {
+.panel-image {
+  position: absolute;
+  left: 0;
+  top: -15%;
+  width: 100%;
+  height: 130%;
+  object-fit: cover;
+  filter: brightness(0.55);
+}
+.panel::after {
+  content: "";
   position: absolute;
   inset: 0;
-  background-image:
-    linear-gradient(var(--line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: 40px 40px;
-  mask-image: radial-gradient(ellipse at 70% 20%, #000 0%, transparent 70%);
-  -webkit-mask-image: radial-gradient(ellipse at 70% 20%, #000 0%, transparent 70%);
+  background: linear-gradient(180deg, rgba(11, 11, 12, 0) 30%, rgba(11, 11, 12, 0.85) 100%);
 }
 .panel-content {
   position: relative;
+  z-index: 1;
   padding: clamp(24px, 4vw, 40px);
+  transform-origin: left bottom;
 }
 .badge {
   display: inline-flex;
@@ -401,6 +472,8 @@ nav a.active::after {
   padding: 6px 12px;
   border: 1px solid var(--line-strong);
   border-radius: 999px;
+  background: rgba(11, 11, 12, 0.5);
+  backdrop-filter: blur(6px);
   font-family: var(--font-mono);
   font-size: 12px;
   color: var(--text-muted);
@@ -417,10 +490,8 @@ nav a.active::after {
 }
 
 /* ============================================================
-   05 Contact
+   Contact
    ============================================================ */
-#contact .section-body { perspective: 900px; }
-
 .cta {
   margin: 0 0 36px;
   font-family: var(--font-display);
@@ -443,16 +514,14 @@ nav a.active::after {
   border-radius: 999px;
   text-decoration: none;
   font-size: 15px;
-  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  transition: background 0.5s var(--ease-osmo), color 0.5s var(--ease-osmo), border-color 0.5s var(--ease-osmo);
 }
-.pill span { transition: transform 0.4s var(--ease-out); }
 .pill:hover,
 .pill:focus-visible {
   background: var(--text);
   border-color: var(--text);
   color: var(--bg);
 }
-.pill:hover span { transform: translateX(4px); }
 
 /* ============================================================
    Footer
@@ -464,15 +533,19 @@ nav a.active::after {
   border-top: 1px solid var(--line);
   display: flex;
   justify-content: space-between;
-  gap: 16px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 12px 24px;
   font-family: var(--font-mono);
   font-size: 12px;
   color: var(--text-faint);
 }
+.credits a,
 .to-top {
   text-decoration: none;
-  transition: color 0.25s ease;
+  transition: color 0.4s var(--ease-osmo);
 }
+.credits a:hover,
 .to-top:hover { color: var(--text); }
 
 /* ============================================================
@@ -495,7 +568,7 @@ nav a.active::after {
   font-size: 13px;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease, transform 0.4s var(--ease-out);
+  transition: opacity 0.4s var(--ease-osmo), transform 0.6s var(--ease-osmo);
   z-index: 50;
 }
 .toast.show {
@@ -511,121 +584,16 @@ nav a.active::after {
 }
 
 /* ============================================================
-   TRANSITIONS — one distinct entrance per section.
-   Hidden states only apply once JS has run (html.js), so the
-   page is fully readable without JavaScript.
-   ============================================================ */
-
-/* Shared: the section label slides down into place */
-.js .reveal .section-label {
-  opacity: 0;
-  transform: translateY(-10px);
-  transition: opacity 0.6s ease, transform 0.8s var(--ease-out);
-}
-.js .reveal.in-view .section-label {
-  opacity: 1;
-  transform: none;
-}
-
-/* 01 Hero — characters rise out of a mask, one after another */
-.js .hero-title .char {
-  transform: translateY(105%);
-  transition: transform 1.1s var(--ease-out);
-  transition-delay: calc(var(--line-d, 0ms) + var(--ci) * 28ms);
-}
-.js .hero-title .line:nth-child(2) { --line-d: 160ms; }
-.js .hero.ready .hero-title .char { transform: none; }
-
-.js .hero-fade {
-  opacity: 0;
-  transition: opacity 1s ease var(--d, 0ms);
-}
-.js .hero.ready .hero-fade { opacity: 1; }
-
-/* 02 About — words sharpen in from a soft blur */
-.js [data-reveal="blur-words"] .w {
-  opacity: 0.08;
-  filter: blur(10px);
-  transform: translateY(0.25em);
-  transition:
-    opacity 0.9s ease,
-    filter 0.9s ease,
-    transform 0.9s var(--ease-out);
-  transition-delay: calc(var(--wi) * 32ms);
-}
-.js [data-reveal="blur-words"].in-view .w {
-  opacity: 1;
-  filter: blur(0);
-  transform: none;
-}
-
-/* 03 Socials — rows slide in from the left while their rules draw */
-.js [data-reveal="slide-rows"] .rows li {
-  opacity: 0;
-  transform: translateX(-48px);
-  transition:
-    opacity 0.7s ease,
-    transform 0.9s var(--ease-out);
-  transition-delay: calc(150ms + var(--i) * 120ms);
-}
-.js [data-reveal="slide-rows"] .rows li::before,
-.js [data-reveal="slide-rows"] .rows li:last-child::after {
-  transform: scaleX(0);
-  transition: transform 1.1s var(--ease-in-out);
-  transition-delay: calc(var(--i) * 120ms);
-}
-.js [data-reveal="slide-rows"].in-view .rows li { opacity: 1; transform: none; }
-.js [data-reveal="slide-rows"].in-view .rows li::before,
-.js [data-reveal="slide-rows"].in-view .rows li:last-child::after { transform: scaleX(1); }
-
-/* 04 Projects — the panel opens outward from its centre (iris) */
-.js [data-reveal="iris"] .panel {
-  clip-path: inset(48% 48% 48% 48% round 16px);
-  transform: scale(0.94);
-  transition:
-    clip-path 1.2s var(--ease-in-out),
-    transform 1.2s var(--ease-in-out);
-}
-.js [data-reveal="iris"] .panel-content {
-  opacity: 0;
-  transform: translateY(16px);
-  transition: opacity 0.6s ease 0.85s, transform 0.8s var(--ease-out) 0.85s;
-}
-.js [data-reveal="iris"].in-view .panel {
-  clip-path: inset(0 0 0 0 round 16px);
-  transform: none;
-}
-.js [data-reveal="iris"].in-view .panel-content { opacity: 1; transform: none; }
-
-/* 05 Contact — content flips up into place in 3D */
-.js [data-reveal="flip"] .flip-item {
-  display: inline-flex;
-  opacity: 0;
-  transform: rotateX(-75deg) translateY(24px);
-  transform-origin: 50% 100%;
-  transition:
-    opacity 0.6s ease,
-    transform 1s var(--ease-out);
-  transition-delay: calc(var(--i) * 140ms);
-}
-.js [data-reveal="flip"] .cta.flip-item { display: block; }
-.js [data-reveal="flip"].in-view .flip-item {
-  opacity: 1;
-  transform: none;
-}
-
-/* ============================================================
-   Reduced motion: everything visible, nothing moves
+   Reduced motion: script.js skips the intro and the reveals;
+   this stops the CSS loops and hover moves too.
    ============================================================ */
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-    transition-delay: 0ms !important;
   }
 }
 
@@ -635,12 +603,14 @@ nav a.active::after {
 @media (max-width: 760px) {
   .section {
     grid-template-columns: 1fr;
-    gap: 28px;
+    gap: 24px;
   }
   .section-label { padding-top: 0; }
   .scroll-cue { display: none; }
   .row { grid-template-columns: 1fr auto; }
   .row-icon { display: none; }
+  .media--wide { aspect-ratio: 4 / 3; }
+  .media--band { aspect-ratio: 16 / 10; }
 }
 
 @media (max-width: 480px) {
