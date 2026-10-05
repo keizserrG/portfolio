@@ -4,27 +4,25 @@
   <meta charset="UTF-8">
   <title>Carl Daniel Geraldez — Portfolio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Carl Daniel Geraldez — 20, based in Cebu, Philippines.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script>document.documentElement.classList.add('js');</script>
 </head>
 <body>
 
-<video autoplay muted loop playsinline id="bg-video">
-  <source src="girl ame 13.mp4" type="video/mp4">
-</video>
-<div class="bg-overlay"></div>
+<div class="progress" aria-hidden="true"><span></span></div>
 
 <audio loop id="bg-music">
   <source src="Tobi Theme Song.mp3" type="audio/mpeg">
 </audio>
 
-<header>
+<header class="site-header">
   <a href="#top" class="logo">CDG<span class="dot">.</span></a>
-
-  <nav>
-    <a href="#aboutme" data-nav>About</a>
+  <nav aria-label="Sections">
+    <a href="#about" data-nav>About</a>
     <a href="#socials" data-nav>Socials</a>
     <a href="#projects" data-nav>Projects</a>
     <a href="#contact" data-nav>Contact</a>
@@ -33,63 +31,123 @@
 
 <main id="top">
 
-  <section id="hero" class="hero fade-section">
-    <p class="eyebrow">&gt; whoami</p>
-    <h1 class="typed-target" data-text="Carl Daniel Geraldez">Carl Daniel Geraldez</h1>
-    <p class="hero-sub">
-      20 · Cebu, Philippines
-      <span class="status"><span class="status-dot"></span>figuring it out, one build at a time</span>
-    </p>
+  <!-- 01 Hero — transition: characters rise out of a mask -->
+  <section id="hero" class="hero">
+    <div class="hero-media" aria-hidden="true">
+      <video autoplay muted loop playsinline id="bg-video">
+        <source src="girl ame 13.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="hero-inner">
+      <p class="eyebrow hero-fade" style="--d: 0ms">Portfolio — 2026</p>
+      <h1 class="hero-title" aria-label="Carl Daniel Geraldez">
+        <span class="line" data-split>Carl Daniel</span>
+        <span class="line" data-split>Geraldez</span>
+      </h1>
+      <div class="hero-meta hero-fade" style="--d: 900ms">
+        <span>20</span>
+        <span class="sep" aria-hidden="true"></span>
+        <span>Cebu, Philippines</span>
+        <span class="sep" aria-hidden="true"></span>
+        <span class="status"><span class="status-dot"></span>Figuring it out, one build at a time</span>
+      </div>
+    </div>
+    <a href="#about" class="scroll-cue hero-fade" style="--d: 1200ms" aria-label="Scroll to About">
+      <span></span>
+    </a>
   </section>
 
-  <section id="aboutme" class="fade-section">
-    <p class="eyebrow">01 — About</p>
-    <h2>About me</h2>
-    <p class="lead">
-      I'm Carl, 20, based in Cebu. Idk what to do in life and i think im also kinda 
-      retarded, i play valorant, cs2, apex legends, roblox, and a trillion more games.
-    </p>
-  </section>
-
-  <section id="socials" class="fade-section">
-    <p class="eyebrow">02 — Socials</p>
-    <h2>Socials</h2>
-    <div class="contact-links">
-      <a href="https://www.instagram.com/xantifico/" class="contact-link" target="_blank" rel="noopener">
-        <span>Instagram</span><span class="arrow" aria-hidden="true">→</span>
-      </a>
-      <button type="button" class="contact-link copy-link" data-copy="064v_e">
-        <span>Discord</span><span class="arrow arrow-copy" aria-hidden="true">⧉</span>
-      </button>
-      <a href="https://www.facebook.com/isusayinsomethingyoucanttellmenothing/" class="contact-link" target="_blank" rel="noopener">
-        <span>Facebook</span><span class="arrow" aria-hidden="true">→</span>
-      </a>
+  <!-- 02 About — transition: words sharpen in from a blur -->
+  <section id="about" class="section reveal" data-reveal="blur-words">
+    <div class="section-label">
+      <span class="num">01</span>
+      <span class="name">About</span>
+    </div>
+    <div class="section-body">
+      <p class="statement" data-words>
+        I'm Carl, a 20-year-old from Cebu still working out what I want to build.
+        Most of my free time goes into games — Valorant, CS2, Apex Legends, Roblox
+        and a long list of others — and into learning how the things I play are made.
+      </p>
     </div>
   </section>
 
-  <section id="projects" class="fade-section">
-    <p class="eyebrow">03 — Projects</p>
-    <h2>Projects</h2>
-    <div class="empty-state">
-      <span class="status-dot status-dot--pending"></span>
-      <p>No projects deployed yet. Check back soon.</p>
+  <!-- 03 Socials — transition: rows slide in from the left as their rules draw -->
+  <section id="socials" class="section reveal" data-reveal="slide-rows">
+    <div class="section-label">
+      <span class="num">02</span>
+      <span class="name">Socials</span>
+    </div>
+    <div class="section-body">
+      <ul class="rows">
+        <li style="--i: 0">
+          <a href="https://www.instagram.com/xantifico/" class="row" target="_blank" rel="noopener">
+            <span class="row-title">Instagram</span>
+            <span class="row-meta">@xantifico</span>
+            <span class="row-icon" aria-hidden="true">↗</span>
+          </a>
+        </li>
+        <li style="--i: 1">
+          <button type="button" class="row copy-link" data-copy="064v_e">
+            <span class="row-title">Discord</span>
+            <span class="row-meta">064v_e</span>
+            <span class="row-icon" aria-hidden="true">⧉</span>
+          </button>
+        </li>
+        <li style="--i: 2">
+          <a href="https://www.facebook.com/isusayinsomethingyoucanttellmenothing/" class="row" target="_blank" rel="noopener">
+            <span class="row-title">Facebook</span>
+            <span class="row-meta">Profile</span>
+            <span class="row-icon" aria-hidden="true">↗</span>
+          </a>
+        </li>
+      </ul>
     </div>
   </section>
 
-  <section id="contact" class="fade-section">
-    <p class="eyebrow">04 — Contact</p>
-    <h2>Contact</h2>
-    <div class="contact-links">
-      <a href="mailto:you@example.com" class="contact-link">
-        <span>Email</span><span class="arrow" aria-hidden="true">→</span>
-      </a>
-      <a href="https://github.com/keizserrG" class="contact-link" target="_blank" rel="noopener">
-        <span>GitHub</span><span class="arrow" aria-hidden="true">→</span>
-      </a>
+  <!-- 04 Projects — transition: the panel opens outward from its centre -->
+  <section id="projects" class="section reveal" data-reveal="iris">
+    <div class="section-label">
+      <span class="num">03</span>
+      <span class="name">Projects</span>
+    </div>
+    <div class="section-body">
+      <div class="panel">
+        <div class="panel-grid" aria-hidden="true"></div>
+        <div class="panel-content">
+          <span class="badge"><span class="status-dot status-dot--pending"></span>In progress</span>
+          <p class="panel-title">Nothing shipped yet.</p>
+          <p class="panel-text">The first projects are being built. Check back soon.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 Contact — transition: content flips up into place in 3D -->
+  <section id="contact" class="section reveal" data-reveal="flip">
+    <div class="section-label">
+      <span class="num">04</span>
+      <span class="name">Contact</span>
+    </div>
+    <div class="section-body">
+      <h2 class="cta flip-item" style="--i: 0">Let's talk.</h2>
+      <div class="cta-links">
+        <a href="mailto:you@example.com" class="pill flip-item" style="--i: 1">
+          Email <span aria-hidden="true">→</span>
+        </a>
+        <a href="https://github.com/keizserrG" class="pill flip-item" style="--i: 2" target="_blank" rel="noopener">
+          GitHub <span aria-hidden="true">↗</span>
+        </a>
+      </div>
     </div>
   </section>
 
 </main>
+
+<footer class="site-footer">
+  <span>© <span id="year">2026</span> Carl Daniel Geraldez</span>
+  <a href="#top" class="to-top">Back to top ↑</a>
+</footer>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 

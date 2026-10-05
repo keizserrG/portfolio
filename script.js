@@ -1,4 +1,3 @@
-const audio = document.getElementById('bg-music');
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ============================
@@ -51,18 +50,18 @@ if (bgVideo) {
 }
 
 /* ============================
-   Audio: fixed default volume
+   Audio: fixed default volume, starts on first click
    ============================ */
-audio.volume = 0.5;
-
-/* start playing music on the first click anywhere on the page.
-   Keeps listening until playback actually starts. */
-function startMusicOnClick() {
-  audio.play()
-    .then(() => document.removeEventListener('click', startMusicOnClick))
-    .catch((err) => console.warn('Autoplay blocked, will retry on next click:', err));
+const audio = document.getElementById('bg-music');
+if (audio) {
+  audio.volume = 0.5;
+  const startMusicOnClick = () => {
+    audio.play()
+      .then(() => document.removeEventListener('click', startMusicOnClick))
+      .catch(() => { /* blocked or file missing — retry on next click */ });
+  };
+  document.addEventListener('click', startMusicOnClick);
 }
-document.addEventListener('click', startMusicOnClick);
 
 /* ============================
    Toast helper
@@ -84,7 +83,7 @@ document.querySelectorAll('.copy-link').forEach((btn) => {
     const value = btn.dataset.copy;
     try {
       await navigator.clipboard.writeText(value);
-      showToast(`Discord tag "${value}" copied to clipboard`);
+      showToast(`Discord tag "${value}" copied`);
     } catch {
       showToast('Could not copy — copy it manually: ' + value);
     }
@@ -92,65 +91,128 @@ document.querySelectorAll('.copy-link').forEach((btn) => {
 });
 
 /* ============================
-   Hero: typing effect
+   Text splitting for the hero and About transitions
    ============================ */
-const typedEl = document.querySelector('.typed-target');
-if (typedEl) {
-  const fullText = typedEl.dataset.text || typedEl.textContent;
+// Hero: every character in its own span, numbered for the stagger.
+document.querySelectorAll('[data-split]').forEach((line) => {
+  const text = line.textContent.trim();
+  line.textContent = '';
+  [...text].forEach((ch, i) => {
+    const span = document.createElement('span');
+    span.className = 'char';
+    span.style.setProperty('--ci', i);
+    span.textContent = ch;
+    line.appendChild(span);
+  });
+});
 
-  if (prefersReducedMotion) {
-    typedEl.textContent = fullText;
-    typedEl.classList.add('done');
-  } else {
-    typedEl.textContent = '';
-    let i = 0;
-    const type = () => {
-      if (i <= fullText.length) {
-        typedEl.textContent = fullText.slice(0, i);
-        i++;
-        setTimeout(type, 45);
-      } else {
-        typedEl.classList.add('done');
-      }
-    };
-    setTimeout(type, 300);
-  }
-}
+// About: every word in its own span; spaces stay as text so lines wrap naturally.
+document.querySelectorAll('[data-words]').forEach((el) => {
+  const words = el.textContent.trim().split(/\s+/);
+  el.textContent = '';
+  words.forEach((word, i) => {
+    const span = document.createElement('span');
+    span.className = 'w';
+    span.style.setProperty('--wi', i);
+    span.textContent = word;
+    el.appendChild(span);
+    if (i < words.length - 1) el.appendChild(document.createTextNode(' '));
+  });
+});
 
 /* ============================
-   Nav: highlight active section on scroll
+   Replaying transitions
+   Every section (hero included) plays its entrance each time it
+   scrolls into view, and resets once it has fully left the screen.
+   Resetting only at 0% visible means the reverse never plays where
+   the user can see it, and a section half on screen never flickers.
+   ============================ */
+const hero = document.querySelector('.hero');
+const ENTER_AT = 0.25;
+
+function watchReplay(el, className, enterAt) {
+  new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        // Tall sections on small screens never reach the ratio, so half a
+        // screen of the section showing counts as "in view" too.
+        const fillsScreen = entry.intersectionRect.height >= window.innerHeight * 0.5;
+        if (entry.intersectionRatio >= enterAt || fillsScreen) {
+          entry.target.classList.add(className);
+        } else if (!entry.isIntersecting) {
+          entry.target.classList.remove(className);
+        }
+      });
+    },
+    { threshold: [0, enterAt, 0.5, 0.75, 1] }
+  ).observe(el);
+}
+
+// Hero waits for the fonts first so the letter masks line up.
+const startHero = () => requestAnimationFrame(() => watchReplay(hero, 'ready', 0.1));
+if (document.fonts && document.fonts.ready) {
+  Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 800))]).then(startHero);
+} else {
+  startHero();
+}
+
+document.querySelectorAll('.reveal').forEach((el) => watchReplay(el, 'in-view', ENTER_AT));
+
+/* ============================
+   Nav: highlight the section in view
    ============================ */
 const navLinks = document.querySelectorAll('nav a[data-nav]');
-const sections = Array.from(navLinks)
-  .map((link) => document.querySelector(link.getAttribute('href')))
-  .filter(Boolean);
-
 const navObserver = new IntersectionObserver(
   (entries) => {
     entries.forEach((entry) => {
-      const id = `#${entry.target.id}`;
-      const link = document.querySelector(`nav a[href="${id}"]`);
-      if (!link) return;
-      if (entry.isIntersecting) {
-        navLinks.forEach((l) => l.classList.remove('active'));
-        link.classList.add('active');
-      }
+      if (!entry.isIntersecting) return;
+      navLinks.forEach((l) => {
+        l.classList.toggle('active', l.getAttribute('href') === `#${entry.target.id}`);
+      });
     });
   },
-  { rootMargin: '-45% 0px -45% 0px', threshold: 0 }
+  { rootMargin: '-45% 0px -50% 0px', threshold: 0 }
 );
-sections.forEach((section) => navObserver.observe(section));
+navLinks.forEach((link) => {
+  const section = document.querySelector(link.getAttribute('href'));
+  if (section) navObserver.observe(section);
+});
+// Clear the highlight when back at the top.
+new IntersectionObserver(
+  ([entry]) => { if (entry.isIntersecting) navLinks.forEach((l) => l.classList.remove('active')); },
+  { rootMargin: '-45% 0px -50% 0px' }
+).observe(hero);
 
 /* ============================
-   Sections: fade in/out as they enter/leave view
+   Scroll: progress bar, header background, hero video fade
    ============================ */
-const fadeEls = document.querySelectorAll('.fade-section');
-const fadeObserver = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((entry) => {
-      entry.target.classList.toggle('in-view', entry.isIntersecting);
-    });
-  },
-  { threshold: 0.3, rootMargin: '0px 0px -10% 0px' }
-);
-fadeEls.forEach((el) => fadeObserver.observe(el));
+const header = document.querySelector('.site-header');
+const progress = document.querySelector('.progress');
+const heroMedia = document.querySelector('.hero-media');
+let ticking = false;
+
+function onScroll() {
+  const y = window.scrollY;
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  progress.style.setProperty('--p', max > 0 ? (y / max).toFixed(4) : 0);
+  header.classList.toggle('scrolled', y > 24);
+
+  if (!prefersReducedMotion && heroMedia) {
+    const t = Math.min(y / hero.offsetHeight, 1);
+    heroMedia.style.setProperty('--media-o', (1 - t * 0.9).toFixed(3));
+    heroMedia.style.setProperty('--media-s', (1 + t * 0.08).toFixed(3));
+  }
+  ticking = false;
+}
+window.addEventListener('scroll', () => {
+  if (!ticking) {
+    ticking = true;
+    requestAnimationFrame(onScroll);
+  }
+}, { passive: true });
+onScroll();
+
+/* ============================
+   Footer year
+   ============================ */
+document.getElementById('year').textContent = new Date().getFullYear();
