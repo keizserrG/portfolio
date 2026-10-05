@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.17/dist/lenis.css">
   <link rel="stylesheet" href="style.css">
-  <link rel="preload" as="image" href="images/cebu-night.webp">
+  <link rel="preload" as="image" href="images/cebu-satellite-wide.webp">
   <script>document.documentElement.classList.add('js');</script>
 </head>
 <body>
@@ -18,7 +18,7 @@
 <!-- Intro: image panel wipes up, logo is revealed and leaves, then the panel peels away -->
 <div class="preloader" data-preloader aria-hidden="true">
   <div class="preloader-bg" data-preloader-bg>
-    <img src="images/cebu-night.webp" alt="" data-preloader-bg-image>
+    <img src="images/cebu-satellite-wide.webp" alt="" data-preloader-bg-image>
   </div>
   <div class="preloader-logo" data-preloader-logo>CDG<span class="dot">.</span></div>
 </div>
@@ -64,15 +64,17 @@
     </div>
     <div class="section-body">
       <h2 class="section-title" data-reveal-content="heading">A bit about me.</h2>
-      <p class="statement" data-reveal-content="paragraph">
-        I'm Carl, a 20-year-old from Cebu still working out what I want to build.
-        Most of my free time goes into games — Valorant, CS2, Apex Legends, Roblox
-        and a long list of others — and into learning how the things I play are made.
-      </p>
-      <figure class="media media--wide" data-reveal-content="image" data-parallax="trigger">
-        <img src="images/cebu-night.webp" alt="Cebu City lights at night, seen from Tops Lookout" data-parallax="target" loading="lazy">
-        <figcaption>Cebu City from Tops Lookout</figcaption>
-      </figure>
+      <div class="about-grid">
+        <p class="statement" data-reveal-content="paragraph">
+          I'm Carl, a 20-year-old from Cebu still working out what I want to build.
+          Most of my free time goes into games — Valorant, CS2, Apex Legends, Roblox
+          and a long list of others — and into learning how the things I play are made.
+        </p>
+        <figure class="media media--portrait" data-reveal-content="image" data-parallax="trigger">
+          <img src="images/cebu-satellite.webp" alt="Satellite image of the whole island of Cebu and the surrounding Visayas islands" data-parallax="target" loading="lazy">
+          <figcaption>Cebu, from orbit · 10.3° N, 123.9° E</figcaption>
+        </figure>
+      </div>
     </div>
   </section>
 
@@ -127,13 +129,6 @@
     </div>
   </section>
 
-  <!-- Image break -->
-  <div class="band" data-reveal-content="component">
-    <figure class="media media--band" data-reveal-content="image" data-parallax="trigger">
-      <img src="images/keyboard.webp" alt="A black mechanical gaming keyboard" data-parallax="target" loading="lazy">
-    </figure>
-  </div>
-
   <!-- Contact -->
   <section id="contact" class="section" data-reveal-content="component">
     <div class="section-label" data-reveal-content="fade">
@@ -157,9 +152,10 @@
 <footer class="site-footer">
   <span>© <span id="year">2026</span> Carl Daniel Geraldez</span>
   <span class="credits">
-    Photos: <a href="https://commons.wikimedia.org/wiki/File:Wikinights_Cebu_-_Tops_Lookout_(019).jpg" target="_blank" rel="noopener">Bjeweld</a>
-    (<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>),
-    SankalpSasnur, AzureSaturn (CC0) via Wikimedia Commons
+    Satellite: <a href="https://s2maps.eu" target="_blank" rel="noopener">Sentinel-2 cloudless – s2maps.eu</a> by EOX IT Services GmbH
+    (contains modified Copernicus Sentinel data 2024,
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>).
+    Setup photo: SankalpSasnur (CC0) via Wikimedia Commons
   </span>
   <a href="#top" class="to-top">Back to top ↑</a>
 </footer>
